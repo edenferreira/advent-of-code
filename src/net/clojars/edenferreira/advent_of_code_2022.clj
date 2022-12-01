@@ -14,10 +14,44 @@
         0
         in))
 
+(defn calories2* [in]
+  (->> in
+       (transduce
+         (comp (partition-by empty?)
+               (remove (comp empty? first))
+               (map (partial map parse-long))
+               (map (partial reduce +)))
+         (fn
+           ([val] val)
+           ([maxes val]
+            (take 3 (sort #(compare %2 %1) (conj maxes val)))))
+         [0])
+       (reduce +)))
+
 (defn calories [& _]
   (println (calories* (line-seq (java.io.BufferedReader. *in*)))))
 
+(defn calories2 [& _]
+  (println (calories2* (line-seq (java.io.BufferedReader. *in*)))))
+
 (comment
+  (calories2*
+    (string/split-lines
+      "1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000"))
+
   (calories*
     (string/split-lines
       "1000
