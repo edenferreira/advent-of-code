@@ -2,8 +2,6 @@
    (:require [clojure.string :as string]
              [clojure.set :as set]))
 
-
-
 (defmacro defclifn [n in-name-vec & body]
   `(defn ~n [~'& [~'manual-in]]
      (let [~(first in-name-vec)
@@ -44,7 +42,7 @@
 
 
 (defclifn jokenpo [in]
-  (let [round-outcome (fn [a b]
+  (let [round-outcome (fn [[a b]]
                         (if (= (:name a) (:name b))
                           :draw
                           (get a (:name b))))
@@ -74,13 +72,66 @@
             (map reverse)
             (map (partial map #(get jokenpo-data %)))
             (map (juxt (comp :score first)
-                       (comp round-outcome-points (partial apply round-outcome))))
+                       (comp round-outcome-points round-outcome)))
             (map (partial apply +)))
       +
       0
       in)))
 
+(defclifn jokenpo2 [in]
+  (let [round-outcome (fn [[a b]]
+                        (if (= (:name a) (:name b))
+                          :draw
+                          (get a (:name b))))
+        rock {:name :rock
+              :score 1
+              :scissor :win
+              :paper :lose}
+        paper {:name :paper
+               :score 2
+               :rock :win
+               :scissor :lose}
+        scissor {:name :scissor
+                 :score 3
+                 :paper :win
+                 :rock :lose}
+        jokenpo-data {"A" rock
+                      "B" paper
+                      "C" scissor}
+        ;; inverted because if from the point of view of the oponent this decision
+        ;; from my point of view X is lose, for example
+        outcome-decision {"X" :win
+                          "Y" :draw
+                          "Z" :lose}
+        outcome-play (fn [[a b]]
+                       (let [decision (get outcome-decision b)
+                             adversary-play (get jokenpo-data a)
+                             my-play-name (if (= decision :draw)
+                                            (:name adversary-play)
+                                            (get (set/map-invert adversary-play) decision))
+                             my-play (first (filter (comp (partial = my-play-name) :name) (vals jokenpo-data)))]
+                         [my-play adversary-play]))
+        round-outcome-points {:win 6
+                              :draw 3
+                              :lose 0}]
+    (transduce
+      (comp (map #(string/split % #" "))
+            (map outcome-play)
+            (map (juxt (comp :score first)
+                       (comp round-outcome-points round-outcome)))
+            (map (partial apply +)))
+      +
+      0
+      in)))
+
+
 (comment
+  (prn
+   (jokenpo2
+    (string/split-lines
+     "A Y
+B X
+C Z")))
   (prn
    (jokenpo
     (string/split-lines
