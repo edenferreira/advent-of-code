@@ -1,20 +1,33 @@
 (ns net.clojars.edenferreira.advent-of-code-2022
-   (:require [clojure.string :as string]))
+   (:require [clojure.string :as string]
+             [clojure.set :as set]))
 
-(defn calories* [in]
-  (transduce
-        (comp (partition-by empty?)
-              (remove (comp empty? first))
-              (map (partial map parse-long))
-              (map (partial reduce +)))
-        (fn
-          ([val] val)
-          ([cmax val]
-             (max cmax val)))
-        0
-        in))
 
-(defn calories2* [in]
+
+(defmacro defclifn [n in-name-vec & body]
+  `(defn ~n [~'& [~'manual-in]]
+     (let [~(first in-name-vec)
+           (or ~'manual-in
+               (line-seq (java.io.BufferedReader. *in*)))
+           res# (do ~@body)]
+       (if ~'manual-in
+         res#
+         (println res#)))))
+
+(defclifn calories [in]
+   (transduce
+     (comp (partition-by empty?)
+           (remove (comp empty? first))
+           (map (partial map parse-long))
+           (map (partial reduce +)))
+     (fn
+       ([val] val)
+       ([cmax val]
+        (max cmax val)))
+     0
+     in))
+
+(defclifn calories2 [in]
   (->> in
        (transduce
          (comp (partition-by empty?)
@@ -28,14 +41,57 @@
          [0])
        (reduce +)))
 
-(defn calories [& _]
-  (println (calories* (line-seq (java.io.BufferedReader. *in*)))))
+(def jokenpo-data
+  (let [rock {:name :rock
+              :score 1
+              :scissor :win
+              :paper :loose}
+        paper {:name :paper
+               :score 2
+               :rock :win
+               :scissor :loose}
+        scissor {:name :scissor
+                 :score 3
+                 :paper :win
+                 :rock :loose}]
+    {"A" rock
+     "X" rock
+     "B" paper
+     "Y" paper
+     "C" scissor
+     "Z" scissor}))
 
-(defn calories2 [& _]
-  (println (calories2* (line-seq (java.io.BufferedReader. *in*)))))
+(def round-outcome-points
+  {:win 6
+   :draw 3
+   :loose 0})
+
+(defn round-outcome [a b]
+  (if (= (:name a) (:name b))
+    :draw
+    (get a (:name b))))
+
+(defclifn jokenpo [in]
+  (transduce
+   (comp (map #(string/split % #" "))
+         (map reverse)
+         (map (partial map #(get jokenpo-data %)))
+         (map (juxt (comp :score first)
+                    (comp round-outcome-points (partial apply round-outcome))))
+         (map (partial apply +)))
+   +
+   0
+   in))
 
 (comment
-  (calories2*
+  (prn
+   (jokenpo
+    (string/split-lines
+     "A Y
+B X
+C Z")))
+
+  (calories2
     (string/split-lines
       "1000
 2000
@@ -52,26 +108,9 @@
 
 10000"))
 
-  (calories*
-    (string/split-lines
-      "1000
-2000
-3000
-
-4000
-
-5000
-6000
-
-7000
-8000
-9000
-
-10000"))
-
-  (calories*
-    (string/split-lines
-      "3264
+  (calories
+   (string/split-lines
+    "3264
 4043
 2537
 3319
@@ -90,5 +129,4 @@
 9307
 1347
 9392
-1203"))
-)
+1203")))

@@ -2,13 +2,7 @@
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}}
  :aliases
  {:run-m {:main-opts ["-m" "net.clojars.edenferreira.advent-of-code"]}
-  :run-x {:ns-default net.clojars.edenferreira.advent-of-code
-          :exec-fn greet
-          :exec-args {:name "Clojure"}}
-  :run-calories {:ns-default net.clojars.edenferreira.advent-of-code-2022
-                 :exec-fn calories}
-  :run-calories2 {:ns-default net.clojars.edenferreira.advent-of-code-2022
-                  :exec-fn calories2}
+  :run-x {:ns-default net.clojars.edenferreira.advent-of-code-2022}
   :build {:deps {io.github.seancorfield/build-clj
                  {:git/tag "v0.6.3" :git/sha "9b8e09b"
                   ;; since we're building an app uberjar, we do not
