@@ -41,8 +41,14 @@
          [0])
        (reduce +)))
 
-(def jokenpo-data
-  (let [rock {:name :rock
+
+
+(defclifn jokenpo [in]
+  (let [round-outcome (fn [a b]
+                        (if (= (:name a) (:name b))
+                          :draw
+                          (get a (:name b))))
+        rock {:name :rock
               :score 1
               :scissor :win
               :paper :loose}
@@ -53,35 +59,26 @@
         scissor {:name :scissor
                  :score 3
                  :paper :win
-                 :rock :loose}]
-    {"A" rock
-     "X" rock
-     "B" paper
-     "Y" paper
-     "C" scissor
-     "Z" scissor}))
-
-(def round-outcome-points
-  {:win 6
-   :draw 3
-   :loose 0})
-
-(defn round-outcome [a b]
-  (if (= (:name a) (:name b))
-    :draw
-    (get a (:name b))))
-
-(defclifn jokenpo [in]
-  (transduce
-   (comp (map #(string/split % #" "))
-         (map reverse)
-         (map (partial map #(get jokenpo-data %)))
-         (map (juxt (comp :score first)
-                    (comp round-outcome-points (partial apply round-outcome))))
-         (map (partial apply +)))
-   +
-   0
-   in))
+                 :rock :loose}
+        jokenpo-data {"A" rock
+                      "X" rock
+                      "B" paper
+                      "Y" paper
+                      "C" scissor
+                      "Z" scissor}
+        round-outcome-points {:win 6
+                              :draw 3
+                              :loose 0}]
+    (transduce
+      (comp (map #(string/split % #" "))
+            (map reverse)
+            (map (partial map #(get jokenpo-data %)))
+            (map (juxt (comp :score first)
+                       (comp round-outcome-points (partial apply round-outcome))))
+            (map (partial apply +)))
+      +
+      0
+      in)))
 
 (comment
   (prn
