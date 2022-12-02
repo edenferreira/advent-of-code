@@ -18,10 +18,7 @@
            (remove (comp empty? first))
            (map (partial map parse-long))
            (map (partial reduce +)))
-     (fn
-       ([val] val)
-       ([cmax val]
-        (max cmax val)))
+     max
      0
      in))
 
@@ -35,7 +32,10 @@
          (fn
            ([val] val)
            ([maxes val]
-            (take 3 (sort #(compare %2 %1) (conj maxes val)))))
+            (take 3
+                  ;; reverse sort
+                  (sort #(compare %2 %1)
+                        (conj maxes val)))))
          [0])
        (reduce +)))
 
