@@ -51,15 +51,15 @@
         rock {:name :rock
               :score 1
               :scissor :win
-              :paper :loose}
+              :paper :lose}
         paper {:name :paper
                :score 2
                :rock :win
-               :scissor :loose}
+               :scissor :lose}
         scissor {:name :scissor
                  :score 3
                  :paper :win
-                 :rock :loose}
+                 :rock :lose}
         jokenpo-data {"A" rock
                       "X" rock
                       "B" paper
@@ -68,7 +68,7 @@
                       "Z" scissor}
         round-outcome-points {:win 6
                               :draw 3
-                              :loose 0}]
+                              :lose 0}]
     (transduce
       (comp (map #(string/split % #" "))
             (map reverse)
