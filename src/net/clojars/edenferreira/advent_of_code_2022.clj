@@ -124,8 +124,34 @@
       0
       in)))
 
+(defclifn rucksack [in]
+  (letfn [(split-in-half [s]
+            (let [half-point (/ (count s) 2)]
+              (vector (subs s 0 half-point)
+                      (subs s half-point (count s)))))
+          (calculate-priority [c]
+            (if (< 96 (int c)) ;; a 97, b 98, ...
+              (- (int c) 96)
+              (- (int c) 38)))]
+    (transduce
+      (comp (map split-in-half)
+            (map (partial map set))
+            (map (partial apply set/intersection))
+            (mapcat (partial map calculate-priority)))
+      +
+      in)))
 
 (comment
+  (prn
+    (rucksack
+      (string/split-lines
+        "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw")))
+
   (prn
    (jokenpo2
     (string/split-lines
