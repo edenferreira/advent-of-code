@@ -141,7 +141,51 @@
       +
       in)))
 
+(defclifn rucksack2 [in]
+  (letfn [(calculate-priority [c]
+            (if (< 96 (int c)) ;; a 97, b 98, ...
+              (- (int c) 96)
+              (- (int c) 38)))]
+    (transduce
+      (comp (map set)
+            (partition-all 3)
+            (map (partial apply set/intersection))
+            (mapcat (partial map calculate-priority)))
+      +
+      in)))
+
+(defclifn sections [in]
+  (letfn [(either-contained-in? [[[x1 y1] [x2 y2]]]
+            (or (<= x1 x2 y2 y1)
+                (<= x2 x1 y1 y2)))]
+    (count
+      (sequence
+        (comp (map #(string/split % #","))
+              (map (partial map #(string/split % #"-")))
+              (map (partial map (partial map parse-long)))
+              (filter either-contained-in?))
+        in))))
+
 (comment
+  (prn
+    (sections
+      (string/split-lines
+        "2-4,6-8
+2-3,4-5
+5-7,7-9
+2-8,3-7
+6-6,4-6
+2-6,4-8")
+      ))
+  (prn
+    (rucksack2
+      (string/split-lines
+        "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw")))
   (prn
     (rucksack
       (string/split-lines
