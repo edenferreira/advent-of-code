@@ -166,7 +166,29 @@
               (filter either-contained-in?))
         in))))
 
+(defclifn sections2 [in]
+  (letfn [(not-contained-at-all? [[[x1 y1] [x2 y2]]]
+            (or (< y1 x2)
+                (< y2 x1)))]
+    (count
+      (sequence
+        (comp (map #(string/split % #","))
+              (map (partial map #(string/split % #"-")))
+              (map (partial map (partial map parse-long)))
+              (remove not-contained-at-all?))
+        in))))
+
 (comment
+  (prn
+    (sections2
+      (string/split-lines
+        "2-4,6-8
+2-3,4-5
+5-7,7-9
+2-8,3-7
+6-6,4-6
+2-6,4-8")
+      ))
   (prn
     (sections
       (string/split-lines
